@@ -167,6 +167,25 @@ class GeneratorChannel(
         waveManager.setAmplitudeJitterEaseIn(0.0)
         doingWaveChange = false
     }
+    /** Fixed values used when the app starts (instead of random ones). */
+    fun applyStartupDefaults() {
+        minAmp.setImmediately(Generator.STARTUP_MIN_AMP)
+        maxAmp.setImmediately(Generator.STARTUP_MAX_AMP)
+        minFreq.setImmediately(Generator.STARTUP_MIN_FREQ)
+        maxFreq.setImmediately(Generator.STARTUP_MAX_FREQ)
+
+        val shape = generatorWaveShapes.find { it.name == Generator.STARTUP_WAVE_NAME }
+            ?: generatorWaveShapes.first()
+        waveManager.addWave(CyclicalWave(shape), "amp")
+        waveManager.addWave(CyclicalWave(shape), "freq")
+        waveManager.restart()
+        waveManager.setSpeed(Generator.STARTUP_SPEED)
+        waveManager.setSpeedJitter(0.0)
+        waveManager.setAmplitudeJitter(0.0)
+        waveManager.setSpeedJitterEaseIn(0.0)
+        waveManager.setAmplitudeJitterEaseIn(0.0)
+        doingWaveChange = false
+    }
     fun setSpeed(speed: Double) {
         waveManager.setSpeed(speed)
     }
@@ -215,6 +234,15 @@ object Generator : PulseSource {
     val MAX_AMP_RANGE = 0.6..1.0
     val MIN_FREQ_RANGE = 0.0..1.0
     val MAX_FREQ_RANGE = 0.0..1.0
+
+    // Values both channels have after an app start
+    const val STARTUP_WAVE_NAME = "Triangle"
+    const val STARTUP_SPEED = 0.5
+    const val STARTUP_MIN_AMP = 1.0
+    const val STARTUP_MAX_AMP = 1.0
+    const val STARTUP_MIN_FREQ = 1.0
+    const val STARTUP_MAX_FREQ = 1.0
+
     val channelA: GeneratorChannel = GeneratorChannel()
     val channelB: GeneratorChannel = GeneratorChannel()
 
@@ -235,8 +263,8 @@ object Generator : PulseSource {
 
     fun initialise() {
         if(!initialised) {
-            channelA.randomise()
-            channelB.randomise()
+            channelA.applyStartupDefaults()
+            channelB.applyStartupDefaults()
             updateInfo()
         }
         initialised = true

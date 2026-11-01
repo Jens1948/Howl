@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -258,6 +259,7 @@ fun MainOptionsPanel(
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
+            FrequencyRangePanel()
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth()
@@ -323,6 +325,75 @@ fun MainOptionsPanel(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
+        }
+    }
+}
+
+/**
+ * Frequency range (min/max) sliders for every output, shown directly below the
+ * power controls on the main screen. Same range as in the output settings dialog
+ * (gear icon -> Calibration), both stay in sync.
+ */
+@Composable
+fun FrequencyRangePanel(modifier: Modifier = Modifier) {
+    val outputs by OutputManager.outputs.collectAsStateWithLifecycle()
+    if (outputs.isEmpty()) return
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        outputs.forEach { output ->
+            FrequencyRangeRow(
+                output = output,
+                showName = outputs.size > 1
+            )
+        }
+    }
+}
+
+@Composable
+private fun FrequencyRangeRow(
+    output: BaseOutput,
+    showName: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val selectedSubset by output.selectedFrequencySubset.collectAsStateWithLifecycle()
+    // Read min/max after collecting the subset so the labels recompose while dragging
+    val minHz = output.minFrequency
+    val maxHz = output.maxFrequency
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        if (showName) {
+            Text(
+                text = output.type.displayName,
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "${minHz}Hz",
+                modifier = Modifier.widthIn(min = 40.dp),
+                style = MaterialTheme.typography.labelMedium
+            )
+            ConstrainedRangeSlider(
+                modifier = Modifier.weight(1f),
+                value = selectedSubset,
+                valueRange = 0.0f..1.0f,
+                minimumGap = 0.05f,
+                onValueChange = { newRange ->
+                    output.setSelectedFrequencySubset(newRange)
+                },
+                onValueChangeFinished = {
+                    OutputManager.saveState()
+                }
+            )
+            Text(
+                text = "${maxHz}Hz",
+                modifier = Modifier.widthIn(min = 40.dp),
+                style = MaterialTheme.typography.labelMedium
+            )
         }
     }
 }
