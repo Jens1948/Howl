@@ -211,7 +211,8 @@ class MainOptionsViewModel : ViewModel() {
 @Composable
 fun MainOptionsPanel(
     viewModel: MainOptionsViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    topContent: @Composable () -> Unit = {}
 ) {
     val mainOptionsState by MainOptions.state.collectAsStateWithLifecycle()
     val showPowerMeter by Prefs.miscShowPowerMeter.collectAsStateWithLifecycle()
@@ -230,36 +231,14 @@ fun MainOptionsPanel(
             // Removed horizontal padding here to allow the top row to overhang
             .fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                // 8.dp outer padding + 8.dp inner panel padding = 16.dp total alignment
-                .padding(horizontal = 8.dp)
-                .height(IntrinsicSize.Max),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Left side: Channel A controls
-            PowerLevelPanel(
-                channelIndex = 0,
-                channelLabel = "A",
-                power = mainOptionsState.channelAPower,
-                viewModel = viewModel,
-            )
+        // Outputs box (passed in by the screen) comes first
+        topContent()
 
-            // Right side: Channel B controls
-            PowerLevelPanel(
-                channelIndex = 1,
-                channelLabel = "B",
-                power = mainOptionsState.channelBPower,
-                viewModel = viewModel,
-            )
-        }
 
         // Wrap the remaining controls in a Column to restore standard 16.dp padding
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            FrequencyRangePanel()
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth()
@@ -325,12 +304,41 @@ fun MainOptionsPanel(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            FrequencyRangePanel()
         }
+
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                // 8.dp outer padding + 8.dp inner panel padding = 16.dp total alignment
+                .padding(horizontal = 8.dp)
+                .height(IntrinsicSize.Max),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Left side: Channel A controls
+            PowerLevelPanel(
+                channelIndex = 0,
+                channelLabel = "A",
+                power = mainOptionsState.channelAPower,
+                viewModel = viewModel,
+            )
+
+            // Right side: Channel B controls
+            PowerLevelPanel(
+                channelIndex = 1,
+                channelLabel = "B",
+                power = mainOptionsState.channelBPower,
+                viewModel = viewModel,
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
 /**
- * Frequency range (min/max) sliders for every output, shown directly below the
+ * Frequency range (min/max) sliders for every output, shown directly above the
  * power controls on the main screen. Same range as in the output settings dialog
  * (gear icon -> Calibration), both stay in sync.
  */

@@ -128,14 +128,15 @@ fun HowlAppScreen(
                 ) {
                     MainOptionsPanel(
                         viewModel = mainOptionsViewModel,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutputsPanel(
-                        onRequestPermissions = { permissions, onResult ->
-                            checkAndRequestPermissions(permissions, onResult)
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        topContent = {
+                            OutputsPanel(
+                                onRequestPermissions = { permissions, onResult ->
+                                    checkAndRequestPermissions(permissions, onResult)
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     )
                 }
                 TabLayout(
@@ -153,13 +154,16 @@ fun HowlAppScreen(
             }
         } else {
             Column(modifier = containerModifier) {
-                MainOptionsPanel(viewModel = mainOptionsViewModel)
-                Spacer(modifier = Modifier.height(8.dp))
-                OutputsPanel(
-                    onRequestPermissions = { permissions, onResult ->
-                        checkAndRequestPermissions(permissions, onResult)
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                MainOptionsPanel(
+                    viewModel = mainOptionsViewModel,
+                    topContent = {
+                        OutputsPanel(
+                            onRequestPermissions = { permissions, onResult ->
+                                checkAndRequestPermissions(permissions, onResult)
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 )
                 TabLayout(
                     tabLayoutViewModel = tabLayoutViewModel,
