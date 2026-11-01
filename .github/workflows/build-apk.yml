@@ -5,6 +5,9 @@ on:
   push:
     branches: [ main, master ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,6 +25,15 @@ jobs:
           cp .github/workflows/debug.keystore ~/.android/debug.keystore
       - name: Build debug APK
         run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - name: Publish APK as release (direct download link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk howl.apk
+          gh release delete latest-build --cleanup-tag --yes || true
+          gh release create latest-build howl.apk \
+            --title "Latest build" \
+            --notes "Automatisch gebaut aus master, Commit ${GITHUB_SHA::7}"
       - uses: actions/upload-artifact@v4
         with:
           name: howl-debug-apk
